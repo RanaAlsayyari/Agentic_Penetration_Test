@@ -1,0 +1,587 @@
+{
+  "timestamp": "2026-03-04T19:39:07.319063",
+  "engagement_id": "eng_20260304_201254",
+  "audit_log_path": "output/logs/audit_eng_20260304_201254.jsonl",
+  "report_path": "",
+  "composite_score": 0.03943181818181818,
+  "composite_breakdown": {
+    "precision": {
+      "weight": 0.3,
+      "score": 0.0,
+      "weighted": 0.0
+    },
+    "tool_utilization": {
+      "weight": 0.25,
+      "score": 0.125,
+      "weighted": 0.03125
+    },
+    "exploit_depth": {
+      "weight": 0.2,
+      "score": 0.0,
+      "weighted": 0.0
+    },
+    "recall": {
+      "weight": 0.15,
+      "score": 0.05454545454545454,
+      "weighted": 0.00818181818181818
+    },
+    "reliability": {
+      "weight": 0.1,
+      "score": 0.0,
+      "weighted": 0.0
+    }
+  },
+  "layers": {
+    "agent": {
+      "total_tests": 32,
+      "passed_tests": 21,
+      "failed_tests": 11,
+      "avg_score": 0.6321839080459769,
+      "results": [
+        {
+          "name": "recon_executed",
+          "agent": "ReconAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "Discovered 50 hosts",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "recon_endpoint_coverage",
+          "agent": "ReconAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "Discovered 50 endpoints (target: >= 20)",
+          "metric_value": 50,
+          "metric_unit": "endpoints"
+        },
+        {
+          "name": "recon_spa_detection",
+          "agent": "ReconAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "SPA=True, framework=None",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "recon_tech_fingerprinting",
+          "agent": "ReconAgent",
+          "passed": false,
+          "score": 0.0,
+          "detail": "Identified: none out of ['Angular', 'Node.js', 'Express', 'SQLite', 'JWT']",
+          "metric_value": 0,
+          "metric_unit": "tech components"
+        },
+        {
+          "name": "recon_known_endpoint_coverage",
+          "agent": "ReconAgent",
+          "passed": true,
+          "score": 0.39655172413793105,
+          "detail": "Found 23/58 known Juice Shop endpoints",
+          "metric_value": 39.6551724137931,
+          "metric_unit": "%"
+        },
+        {
+          "name": "recon_linkfinder_executed",
+          "agent": "ReconAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "LinkFinder extracted 48 endpoints from JS files",
+          "metric_value": 48,
+          "metric_unit": "JS endpoints"
+        },
+        {
+          "name": "recon_handoff_auth_paths",
+          "agent": "ReconAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "Auth-related paths (login/auth/signin) included in discovery",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "auth_executed",
+          "agent": "AuthAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "Auth attempted on juiceshop",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "auth_correct_method",
+          "agent": "AuthAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "Used endpoint: http://127.0.0.1:3000/rest/user/login",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "auth_succeeded",
+          "agent": "AuthAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "Logged in as admin@juice-sh.op",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "auth_finding_emitted",
+          "agent": "AuthAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "Emitted 1 finding(s): ['Authentication Failure - Weak/Default Credentials']",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "auth_finding_severity_correct",
+          "agent": "AuthAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "Auth finding severity matches expected range",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "auth_handoff_to_scanner",
+          "agent": "AuthAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "Auth context passed to Scanner",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "scanner_auth_injected",
+          "agent": "ScannerAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "Auth context injected into ZAP",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "scanner_ajax_spider",
+          "agent": "ScannerAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "AJAX Spider discovered 589 URLs",
+          "metric_value": 589,
+          "metric_unit": "URLs"
+        },
+        {
+          "name": "scanner_api_seeded",
+          "agent": "ScannerAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "Seeded 30 API endpoints",
+          "metric_value": 30,
+          "metric_unit": "endpoints"
+        },
+        {
+          "name": "scanner_proxy_seeded",
+          "agent": "ScannerAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "Proxy-seeded 265 request/param combinations",
+          "metric_value": 265,
+          "metric_unit": "requests"
+        },
+        {
+          "name": "scanner_active_scan",
+          "agent": "ScannerAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "Active scan found 1531 alerts",
+          "metric_value": 1531,
+          "metric_unit": "alerts"
+        },
+        {
+          "name": "scanner_high_alerts",
+          "agent": "ScannerAgent",
+          "passed": true,
+          "score": 0.3333333333333333,
+          "detail": "ZAP found 1 High/Critical alerts out of 2831 total",
+          "metric_value": 1,
+          "metric_unit": "high alerts"
+        },
+        {
+          "name": "scanner_output_validity",
+          "agent": "ScannerAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "2831/2831 findings have valid schema",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "analyzer_noise_filtered",
+          "agent": "AnalyzerAgent",
+          "passed": false,
+          "score": 0.0,
+          "detail": "NOISE_FILTERED event not found",
+          "metric_value": 0,
+          "metric_unit": "noise alerts"
+        },
+        {
+          "name": "analyzer_fp_filtering",
+          "agent": "AnalyzerAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "Rejected 0 false positives: []",
+          "metric_value": 0,
+          "metric_unit": "false positives"
+        },
+        {
+          "name": "analyzer_true_positive_retention",
+          "agent": "AnalyzerAgent",
+          "passed": false,
+          "score": 0.0,
+          "detail": "Retained 0/1 ZAP High/Critical findings",
+          "metric_value": 0.0,
+          "metric_unit": "%"
+        },
+        {
+          "name": "analyzer_output_produced",
+          "agent": "AnalyzerAgent",
+          "passed": false,
+          "score": 0.0,
+          "detail": "Analyzer produced 0 confirmed findings",
+          "metric_value": 0,
+          "metric_unit": "findings"
+        },
+        {
+          "name": "analyzer_no_rate_errors",
+          "agent": "AnalyzerAgent",
+          "passed": true,
+          "score": 1.0,
+          "detail": "No rate limit errors",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "classifier_executed",
+          "agent": "ClassifierAgent",
+          "passed": false,
+          "score": 0.0,
+          "detail": "Classified 0 findings",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "classifier_owasp_accuracy",
+          "agent": "ClassifierAgent",
+          "passed": false,
+          "score": 0.0,
+          "detail": "0/0 correct. ",
+          "metric_value": 0.0,
+          "metric_unit": "%"
+        },
+        {
+          "name": "classifier_cwe_accuracy",
+          "agent": "ClassifierAgent",
+          "passed": false,
+          "score": 0.0,
+          "detail": "0/0 CWE mappings validated",
+          "metric_value": 0.0,
+          "metric_unit": "%"
+        },
+        {
+          "name": "classifier_cvss_valid",
+          "agent": "ClassifierAgent",
+          "passed": false,
+          "score": 0.0,
+          "detail": "0/0 CVSS vectors are valid CVSS:3.1 format",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "classifier_completeness",
+          "agent": "ClassifierAgent",
+          "passed": false,
+          "score": 0.5,
+          "detail": "Some findings missing classification fields",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "reporter_executed",
+          "agent": "ReporterAgent",
+          "passed": false,
+          "score": 0.0,
+          "detail": "REPORT_GENERATED not found",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "reporter_file_exists",
+          "agent": "ReporterAgent",
+          "passed": false,
+          "score": 0.0,
+          "detail": "Report file not found or empty",
+          "metric_value": null,
+          "metric_unit": ""
+        }
+      ]
+    },
+    "tool": {
+      "total_tests": 8,
+      "passed_tests": 7,
+      "failed_tests": 1,
+      "avg_score": 0.7802083333333334,
+      "results": [
+        {
+          "name": "zap_live_high_alerts",
+          "agent": "ZAP",
+          "passed": true,
+          "score": 0.2,
+          "detail": "ZAP live: 1 High alerts, 1531 total",
+          "metric_value": 1,
+          "metric_unit": "high alerts"
+        },
+        {
+          "name": "zap_site_tree_coverage",
+          "agent": "ZAP",
+          "passed": true,
+          "score": 1.0,
+          "detail": "ZAP site tree has 289 URLs",
+          "metric_value": 289,
+          "metric_unit": "URLs"
+        },
+        {
+          "name": "zap_utilization",
+          "agent": "ZAP",
+          "passed": false,
+          "score": 0.125,
+          "detail": "Agent got 1 High alerts vs estimated 8 manual ceiling (12%)",
+          "metric_value": 12.5,
+          "metric_unit": "% of ceiling"
+        },
+        {
+          "name": "httpprober_success_rate",
+          "agent": "HTTPProber",
+          "passed": true,
+          "score": 0.9166666666666666,
+          "detail": "66/72 probes got responses",
+          "metric_value": 91.66666666666666,
+          "metric_unit": "%"
+        },
+        {
+          "name": "httpprober_spa_accuracy",
+          "agent": "HTTPProber",
+          "passed": true,
+          "score": 1.0,
+          "detail": "SPA detection: {'timestamp': '2026-03-04T17:12:59.534700Z', 'engagement_id': 'eng_20260304_201254', 'event': 'SPA_DETECTION', 'is_spa': True, 'framework': None, 'evidence': '3/3 random paths returned identical 75054-byte response (HTTP 200). All routes serve the same shell \u2014 HTTP status codes are NOT reliable.', 'baseline_size': 75054}",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "httpprober_linkfinder_yield",
+          "agent": "HTTPProber",
+          "passed": true,
+          "score": 1.0,
+          "detail": "LinkFinder extracted 48 endpoints from JS bundles",
+          "metric_value": 48,
+          "metric_unit": "endpoints"
+        },
+        {
+          "name": "authtool_success_rate",
+          "agent": "AuthTool",
+          "passed": true,
+          "score": 1.0,
+          "detail": "1 successes, 0 failures out of 1 attempts",
+          "metric_value": 100.0,
+          "metric_unit": "%"
+        },
+        {
+          "name": "authtool_zap_auth_configured",
+          "agent": "AuthTool",
+          "passed": true,
+          "score": 1.0,
+          "detail": "ZAP received auth credentials",
+          "metric_value": null,
+          "metric_unit": ""
+        }
+      ]
+    },
+    "system": {
+      "total_tests": 18,
+      "passed_tests": 11,
+      "failed_tests": 7,
+      "avg_score": 0.5456228956228956,
+      "results": [
+        {
+          "name": "scoreboard_total_solves",
+          "agent": "Pipeline",
+          "passed": true,
+          "score": 0.6,
+          "detail": "6/110 challenges solved",
+          "metric_value": 6,
+          "metric_unit": "solves"
+        },
+        {
+          "name": "scoreboard_difficulty_breakdown",
+          "agent": "Pipeline",
+          "passed": true,
+          "score": 0.5,
+          "detail": "By difficulty: 1-star: 2, 2-star: 4",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "scoreboard_category_breadth",
+          "agent": "Pipeline",
+          "passed": true,
+          "score": 1.0,
+          "detail": "Categories with solves: {'Broken Access Control', 'Miscellaneous', 'Injection', 'Broken Authentication', 'Security Misconfiguration'}",
+          "metric_value": 5,
+          "metric_unit": "categories"
+        },
+        {
+          "name": "scoreboard_login_admin",
+          "agent": "Pipeline",
+          "passed": true,
+          "score": 1.0,
+          "detail": "'Login Admin' (SQL Injection login bypass): SOLVED",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "scoreboard_password_strength",
+          "agent": "Pipeline",
+          "passed": true,
+          "score": 1.0,
+          "detail": "'Password Strength' (Weak password discovery): SOLVED",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "scoreboard_error_handling",
+          "agent": "Pipeline",
+          "passed": true,
+          "score": 1.0,
+          "detail": "'Error Handling' (Error disclosure): SOLVED",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "scoreboard_confidential_document",
+          "agent": "Pipeline",
+          "passed": false,
+          "score": 0.0,
+          "detail": "'Confidential Document' (Directory traversal): NOT SOLVED",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "scoreboard_admin_section",
+          "agent": "Pipeline",
+          "passed": false,
+          "score": 0.0,
+          "detail": "'Admin Section' (Access control bypass): NOT SOLVED",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "scoreboard_score_board",
+          "agent": "Pipeline",
+          "passed": true,
+          "score": 1.0,
+          "detail": "'Score Board' (Information discovery): SOLVED",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "precision",
+          "agent": "Pipeline",
+          "passed": false,
+          "score": 0.0,
+          "detail": "0 true positives out of 0 reported (noise in report: 0)",
+          "metric_value": 0.0,
+          "metric_unit": "%"
+        },
+        {
+          "name": "recall",
+          "agent": "Pipeline",
+          "passed": true,
+          "score": 0.05454545454545454,
+          "detail": "6/110 challenges solved",
+          "metric_value": 5.454545454545454,
+          "metric_unit": "%"
+        },
+        {
+          "name": "exploit_depth_avg",
+          "agent": "Pipeline",
+          "passed": false,
+          "score": 0.0,
+          "detail": "No report to analyze",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "time_total_duration",
+          "agent": "Pipeline",
+          "passed": false,
+          "score": 0.0,
+          "detail": "Cannot compute duration \u2014 missing start/end timestamps",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "time_phase_breakdown",
+          "agent": "Pipeline",
+          "passed": true,
+          "score": 1.0,
+          "detail": "Phase timing: reconnaissance: 23s; authentication_testing: 1s; active_scanning: 1173s",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "reliability_all_phases",
+          "agent": "Pipeline",
+          "passed": false,
+          "score": 0.6666666666666666,
+          "detail": "Completed 4/6 phases: {'analysis', 'reconnaissance', 'active_scanning', 'authentication_testing'}",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "reliability_no_scope_violations",
+          "agent": "Pipeline",
+          "passed": true,
+          "score": 1.0,
+          "detail": "No scope violations",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "reliability_engagement_complete",
+          "agent": "Pipeline",
+          "passed": false,
+          "score": 0.0,
+          "detail": "Engagement did not complete",
+          "metric_value": null,
+          "metric_unit": ""
+        },
+        {
+          "name": "reliability_error_count",
+          "agent": "Pipeline",
+          "passed": true,
+          "score": 1.0,
+          "detail": "0 error events in audit log",
+          "metric_value": 0,
+          "metric_unit": "errors"
+        }
+      ]
+    }
+  },
+  "summary": {
+    "total_tests": 58,
+    "total_passed": 39,
+    "total_failed": 19
+  }
+}

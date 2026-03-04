@@ -27,17 +27,17 @@ class Severity(str, Enum):
     INFO     = "Info"
 
 class OWASPCategory(str, Enum):
-    A01_BROKEN_ACCESS_CONTROL     = "A01:2021 - Broken Access Control"
-    A02_CRYPTO_FAILURES           = "A02:2021 - Cryptographic Failures"
-    A03_INJECTION                 = "A03:2021 - Injection"
-    A04_INSECURE_DESIGN           = "A04:2021 - Insecure Design"
-    A05_SECURITY_MISCONFIG        = "A05:2021 - Security Misconfiguration"
-    A06_VULNERABLE_COMPONENTS     = "A06:2021 - Vulnerable and Outdated Components"
-    A07_AUTH_FAILURES             = "A07:2021 - Identification and Authentication Failures"
-    A08_DATA_INTEGRITY            = "A08:2021 - Software and Data Integrity Failures"
-    A09_LOGGING_FAILURES          = "A09:2021 - Security Logging and Monitoring Failures"
-    A10_SSRF                      = "A10:2021 - Server-Side Request Forgery"
-    UNKNOWN                       = "Unknown"
+    A01_BROKEN_ACCESS_CONTROL         = "A01:2025 - Broken Access Control"
+    A02_SECURITY_MISCONFIG            = "A02:2025 - Security Misconfiguration"
+    A03_SUPPLY_CHAIN_FAILURES         = "A03:2025 - Software Supply Chain Failures"
+    A04_CRYPTO_FAILURES               = "A04:2025 - Cryptographic Failures"
+    A05_INJECTION                     = "A05:2025 - Injection"
+    A06_INSECURE_DESIGN               = "A06:2025 - Insecure Design"
+    A07_AUTH_FAILURES                 = "A07:2025 - Authentication Failures"
+    A08_DATA_INTEGRITY                = "A08:2025 - Software or Data Integrity Failures"
+    A09_LOGGING_FAILURES              = "A09:2025 - Security Logging and Alerting Failures"
+    A10_EXCEPTIONAL_CONDITIONS        = "A10:2025 - Mishandling of Exceptional Conditions"
+    UNKNOWN                           = "Unknown"
 
 class AgentPhase(str, Enum):
     RECON          = "reconnaissance"
@@ -46,6 +46,7 @@ class AgentPhase(str, Enum):
     ACTIVE_SCAN    = "active_scanning"
     ACCESS_CONTROL = "access_control_testing"
     ANALYSIS       = "analysis"
+    CLASSIFICATION = "classification"
     REPORTING      = "reporting"
     COMPLETE       = "complete"
     ERROR          = "error"
@@ -110,22 +111,52 @@ class RawFinding(BaseModel):
 class AnalyzedRisk(BaseModel):
     """
     A fully analyzed, LLM-interpreted security risk.
-    This is what the reporter uses to write the report.
+
+    FIELDS ARE SPLIT BY AGENT RESPONSIBILITY:
+
+    ── AnalyzerAgent fills these ──────────────────────────────────────────────
+    id, title, affected_url, affected_parameter, description, technical_detail,
+    evidence, remediation_context, is_false_positive, severity_estimate,
+    raw_finding
+
+    ── ClassifierAgent fills these (appended after Analyzer) ──────────────────
+    owasp_category, owasp_reference_url, cwe_ids, cwe_primary, cwe_reference_urls,
+    cvss_vector, cvss_score, cvss_severity, classification_reasoning,
+    severity_discrepancy_note, remediation_standard, classification_confidence
+
+    ── ReporterAgent merges these ─────────────────────────────────────────────
+    remediation_final (merged from remediation_context + remediation_standard)
     """
+
+    # ── AnalyzerAgent fields ──────────────────────────────────────────────────
     id: str
     title: str
-    severity: Severity
-    owasp_category: OWASPCategory
     affected_url: str
-    affected_parameter: Optional[str]  = None
-    description: str                          # plain English, for non-technical reader
-    technical_detail: str                     # for developer audience
-    evidence: Optional[str]            = None # proof of finding
-    remediation: str                          # concrete fix steps
-    is_false_positive: bool            = False
-    cvss_score: Optional[float]        = None
-    references: list[str]              = []
-    raw_finding: Optional[RawFinding]  = None
+    affected_parameter: Optional[str]       = None
+    description: str                                # plain English for business reader
+    technical_detail: str                           # for developer audience
+    evidence: Optional[str]                 = None  # proof from scanner output
+    remediation_context: str                = ""    # context-specific fix for this app
+    is_false_positive: bool                 = False
+    severity_estimate: Severity             = Severity.INFO  # analyst's human judgment
+    raw_finding: Optional[RawFinding]       = None
+
+    # ── ClassifierAgent fields (None until Classifier runs) ───────────────────
+    owasp_category: Optional[OWASPCategory] = None
+    owasp_reference_url: Optional[str]      = None
+    cwe_ids: list[str]                      = []    # e.g. ["CWE-89", "CWE-20"]
+    cwe_primary: Optional[str]              = None  # e.g. "CWE-89"
+    cwe_reference_urls: list[str]           = []
+    cvss_vector: Optional[str]              = None  # e.g. "CVSS:3.1/AV:N/AC:L/..."
+    cvss_score: Optional[float]             = None  # e.g. 9.8
+    cvss_severity: Optional[Severity]       = None  # derived from cvss_score
+    classification_reasoning: Optional[str] = None  # chain-of-thought explanation
+    severity_discrepancy_note: Optional[str]= None  # if estimate != cvss_severity
+    remediation_standard: Optional[str]    = None  # standard fix from OWASP/CWE
+    classification_confidence: Optional[str]= None  # High / Medium / Low
+
+    # ── ReporterAgent merges into this ────────────────────────────────────────
+    remediation_final: Optional[str]        = None  # merged remediation for report
 
 
 class AuthSession(BaseModel):
@@ -153,6 +184,11 @@ class AgentState(BaseModel):
     raw_findings: list[RawFinding]          = []
     analyzed_risks: list[AnalyzedRisk]      = []
     auth_sessions: list[AuthSession]        = []
+
+    # ── SPA detection (set by ReconAgent) ──────────────────────────────────
+    is_spa: bool                            = False
+    spa_framework: Optional[str]            = None
+    spa_evidence: Optional[str]             = None
 
     # ── Orchestrator reasoning ────────────────────────────────────────────────
     orchestrator_plan: list[str]            = []   # current plan steps

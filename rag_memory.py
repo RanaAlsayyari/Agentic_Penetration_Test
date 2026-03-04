@@ -50,7 +50,7 @@ console = Console()
 OWASP_KNOWLEDGE = [
     {
         "id":    "A01_broken_access_control",
-        "title": "A01:2021 - Broken Access Control",
+        "title": "A01:2025 - Broken Access Control",
         "content": """
 Broken Access Control is the #1 OWASP risk. It occurs when users can act outside
 their intended permissions — accessing other users' data, admin functions, or
@@ -84,7 +84,7 @@ CVSS Base Score: Often High (7.0+) to Critical (9.0+) depending on data sensitiv
     },
     {
         "id":    "A02_crypto_failures",
-        "title": "A02:2021 - Cryptographic Failures",
+        "title": "A04:2025 - Cryptographic Failures",
         "content": """
 Cryptographic Failures (formerly 'Sensitive Data Exposure') covers weaknesses
 in how applications protect data in transit and at rest.
@@ -115,12 +115,12 @@ Remediation:
 
 CVSS Score: Medium (4.0) to High (7.0+) depending on data sensitivity.
 """,
-        "owasp_id": "A02",
+        "owasp_id": "A04",
         "severity": "High"
     },
     {
-        "id":    "A03_injection",
-        "title": "A03:2021 - Injection (SQL, XSS, Command)",
+        "id":    "A05_injection",
+        "title": "A05:2025 - Injection (SQL, XSS, Command)",
         "content": """
 Injection flaws occur when untrusted data is sent to an interpreter as part of
 a command or query. The attacker's hostile data can trick the interpreter into
@@ -155,12 +155,12 @@ Remediation:
 
 CVSS Score: Critical (9.0+) for SQL injection, High (7.0+) for XSS.
 """,
-        "owasp_id": "A03",
+        "owasp_id": "A05",
         "severity": "Critical"
     },
     {
-        "id":    "A04_insecure_design",
-        "title": "A04:2021 - Insecure Design",
+        "id":    "A06_insecure_design",
+        "title": "A06:2025 - Insecure Design",
         "content": """
 Insecure Design refers to missing or ineffective security controls in the
 architecture and design phase — problems that can't be fixed by good implementation
@@ -191,12 +191,226 @@ Remediation:
 
 CVSS Score: Varies widely — can be Critical (10.0) for fundamental design flaws.
 """,
-        "owasp_id": "A04",
+        "owasp_id": "A06",
         "severity": "High"
     },
     {
-        "id":    "xss_detection",
-        "title": "XSS Detection and Exploitation Patterns",
+        "id":    "A02_security_misconfig",
+        "title": "A02:2025 - Security Misconfiguration",
+        "content": """
+Security Misconfiguration is one of the most common OWASP risks. It occurs when
+security settings are not defined, implemented, or maintained properly.
+
+Common vulnerabilities:
+- Default credentials left unchanged on admin panels, databases, or services
+- Unnecessary features enabled (directory listing, debug mode, sample apps)
+- Missing security headers (HSTS, CSP, X-Content-Type-Options, X-Frame-Options)
+- Overly permissive CORS configuration (Access-Control-Allow-Origin: *)
+- Verbose error messages exposing stack traces, SQL queries, or server info
+- Unnecessary HTTP methods enabled (PUT, DELETE, TRACE)
+- Cloud storage buckets with public read/write access
+
+How to detect:
+- Check HTTP response headers for missing security headers
+- Test for directory listing on common paths (/images/, /uploads/, /static/)
+- Check CORS headers with cross-origin requests
+- Look for verbose error messages by triggering errors intentionally
+- Check for default admin accounts and pages
+
+Remediation:
+- Implement a repeatable hardening process for all environments
+- Remove or disable unused features, frameworks, and services
+- Review and update security configurations regularly
+- Set restrictive CORS policies (never use wildcard in production)
+- Implement proper error handling that doesn't expose internals
+- Add all recommended security headers (HSTS, CSP, X-Frame-Options)
+
+CVSS Score: Medium (4.0) to High (7.0) depending on misconfiguration impact.
+""",
+        "owasp_id": "A02",
+        "severity": "Medium"
+    },
+    {
+        "id":    "A03_supply_chain",
+        "title": "A03:2025 - Software Supply Chain Failures",
+        "content": """
+Software Supply Chain Failures cover risks from third-party components, libraries,
+and dependencies that are vulnerable, outdated, or compromised.
+
+Common vulnerabilities:
+- Using libraries with known CVEs (e.g., Log4Shell in Log4j, Spring4Shell)
+- Not tracking dependency versions or failing to update regularly
+- Pulling packages from untrusted registries without integrity verification
+- Typosquatting attacks (installing malicious package with similar name)
+- Compromised build pipelines injecting malicious code during CI/CD
+- Including unnecessary dependencies that expand the attack surface
+
+How to detect:
+- Run dependency audit tools (npm audit, pip-audit, OWASP Dependency-Check)
+- Check library versions against known CVE databases
+- Scan for outdated packages in requirements.txt, package.json, pom.xml
+- Review lock files for unexpected version changes
+
+Remediation:
+- Maintain a software bill of materials (SBOM) for all projects
+- Use automated dependency scanning in CI/CD pipelines
+- Pin dependency versions and verify package integrity (checksums, signatures)
+- Subscribe to security advisories for all direct dependencies
+- Remove unused dependencies to reduce attack surface
+- Use only trusted package registries with reputation verification
+
+CVSS Score: Varies — can be Critical (10.0) for vulnerabilities like Log4Shell.
+""",
+        "owasp_id": "A03",
+        "severity": "High"
+    },
+    {
+        "id":    "A07_auth_failures",
+        "title": "A07:2025 - Authentication Failures",
+        "content": """
+Authentication Failures cover weaknesses in identity verification, session
+management, and credential handling.
+
+Common vulnerabilities:
+- Weak password policies (no minimum length, no complexity, no common-password check)
+- Missing brute-force protection (no rate limiting, no account lockout)
+- Credential stuffing susceptibility (no multi-factor authentication)
+- Session fixation (session ID not rotated after login)
+- Session tokens in URLs (visible in logs, referer headers, browser history)
+- Missing session expiration or overly long session lifetimes
+- Insecure "Remember Me" functionality
+- Password reset flaws (predictable tokens, no expiration, email-only verification)
+
+How to detect:
+- Test login with common passwords (admin/admin, test/test)
+- Attempt brute force and check for rate limiting or lockout
+- Check session cookie flags (Secure, HttpOnly, SameSite)
+- Verify session rotation after authentication
+- Test password reset flow for token predictability
+- Check if MFA is available and enforced
+
+Remediation:
+- Implement multi-factor authentication (TOTP, WebAuthn, SMS as last resort)
+- Enforce strong password policies with breach-database checks
+- Implement account lockout after 5-10 failed attempts with exponential backoff
+- Rotate session IDs after successful authentication
+- Set session timeouts (idle: 15 min, absolute: 8 hours)
+- Use Secure, HttpOnly, SameSite=Strict cookie attributes
+
+CVSS Score: High (7.0+) to Critical (9.0+) depending on authentication bypass impact.
+""",
+        "owasp_id": "A07",
+        "severity": "High"
+    },
+    {
+        "id":    "A08_data_integrity",
+        "title": "A08:2025 - Software or Data Integrity Failures",
+        "content": """
+Software or Data Integrity Failures cover assumptions about software updates,
+critical data, and CI/CD pipelines without verifying integrity.
+
+Common vulnerabilities:
+- Insecure deserialization (accepting untrusted serialized objects)
+- Auto-update mechanisms without signature verification
+- CI/CD pipeline manipulation (injecting malicious build steps)
+- Unsigned or unverified firmware/software updates
+- Trusting data from CDNs or third-party sources without SRI (Subresource Integrity)
+- Mass assignment vulnerabilities (accepting unexpected fields in API requests)
+
+How to detect:
+- Check if application uses serialization/deserialization of user-controlled data
+- Review update mechanisms for signature verification
+- Test API endpoints for mass assignment (send extra fields)
+- Check JavaScript includes for SRI attributes
+- Review CI/CD pipeline permissions and audit logs
+
+Remediation:
+- Never deserialize untrusted data; use safe serialization formats (JSON over Java serialization)
+- Implement digital signatures for all software updates and packages
+- Use Subresource Integrity (SRI) for all external JavaScript/CSS includes
+- Protect CI/CD pipelines with code review, signed commits, and least-privilege access
+- Validate all input against a whitelist of expected fields (prevent mass assignment)
+
+CVSS Score: High (7.0+) for deserialization attacks, Critical (9.0+) for pipeline compromise.
+""",
+        "owasp_id": "A08",
+        "severity": "High"
+    },
+    {
+        "id":    "A09_logging_failures",
+        "title": "A09:2025 - Security Logging and Alerting Failures",
+        "content": """
+Security Logging and Alerting Failures occur when breaches or attacks go undetected
+due to insufficient logging, monitoring, or incident response capabilities.
+
+Common vulnerabilities:
+- Login failures, access control failures, or input validation failures not logged
+- Logs not monitored for suspicious patterns or anomalies
+- Logs stored only locally and easily deleted by attacker after compromise
+- No alerting mechanism for critical security events
+- Sensitive data (passwords, tokens, PII) logged in plaintext
+- Log injection vulnerabilities (attacker can write false log entries)
+- Insufficient log retention (logs deleted before forensic analysis can occur)
+
+How to detect:
+- Review logging configuration for security-critical events
+- Check if failed login attempts are logged
+- Verify log integrity protection (append-only, centralized storage)
+- Test if security events trigger alerts
+- Check for sensitive data in log files
+
+Remediation:
+- Log all authentication events (success, failure, lockout)
+- Log all access control decisions (especially denials)
+- Use structured logging (JSON) with consistent timestamps
+- Send logs to centralized, tamper-resistant storage (SIEM)
+- Implement real-time alerting for critical events (mass login failures, privilege escalation)
+- Protect logs from injection by sanitizing logged data
+- Never log passwords, tokens, or full credit card numbers
+
+CVSS Score: Usually Info/Low as standalone issue, but enables Critical impact when attacks go undetected.
+""",
+        "owasp_id": "A09",
+        "severity": "Medium"
+    },
+    {
+        "id":    "A10_exceptional_conditions",
+        "title": "A10:2025 - Mishandling of Exceptional Conditions",
+        "content": """
+Mishandling of Exceptional Conditions covers failures in how applications handle
+errors, edge cases, and unexpected inputs.
+
+Common vulnerabilities:
+- Unhandled exceptions revealing stack traces with internal paths, database schemas, or code
+- Generic error handling that masks the real issue from developers but confuses users
+- Error messages that differ between "user not found" and "wrong password" (user enumeration)
+- Application crashes on unexpected input (null bytes, oversized payloads, special characters)
+- Race conditions in error-handling paths leading to inconsistent state
+- Missing input validation leading to unhandled type errors or buffer overflows
+
+How to detect:
+- Submit malformed input (empty fields, null bytes, extremely long strings)
+- Trigger errors and check if stack traces are visible in responses
+- Compare error messages for existing vs non-existing users (enumeration)
+- Send unexpected HTTP methods (PATCH, DELETE) to standard endpoints
+- Test with special characters in all input fields
+
+Remediation:
+- Implement consistent error handling across the entire application
+- Return generic error messages to users; log detailed errors server-side
+- Use the same error message for "user not found" and "wrong password"
+- Validate all input with strict type and length constraints
+- Implement global exception handlers that prevent stack trace leakage
+- Test error handling paths with fuzzing and edge-case inputs
+
+CVSS Score: Low (2.0) to Medium (5.0) for information disclosure; higher if it enables further attacks.
+""",
+        "owasp_id": "A10",
+        "severity": "Medium"
+    },
+    {
+        "id":    "A05_xss_detection",
+        "title": "A05:2025 - XSS Detection and Exploitation Patterns",
         "content": """
 XSS (Cross-Site Scripting) Detection Patterns for Pentest Agents:
 
@@ -226,7 +440,7 @@ False positive indicators:
 - Input is HTML-encoded in response
 - Content-Type is JSON (XSS doesn't execute in JSON)
 """,
-        "owasp_id": "A03",
+        "owasp_id": "A05",
         "severity": "High"
     }
 ]

@@ -1,0 +1,7 @@
+{"timestamp": "2026-03-04T11:32:38.839299Z", "engagement_id": "eng_20260304_143238", "event": "AUDIT_START", "log_path": "output\\logs\\audit_eng_20260304_143238.jsonl"}
+{"timestamp": "2026-03-04T11:32:38.853174Z", "engagement_id": "eng_20260304_143238", "event": "ENGAGEMENT_START", "target": "http://localhost:3000", "scope": ["http://localhost:8888", "http://localhost:3000", "http://127.0.0.1:8888", "http://127.0.0.1:3000"], "mode": "active"}
+{"timestamp": "2026-03-04T11:32:38.853174Z", "engagement_id": "eng_20260304_143238", "event": "SCOPE_INIT", "allowed_targets": ["http://localhost:8888", "http://localhost:3000", "http://127.0.0.1:8888", "http://127.0.0.1:3000"], "count": 4}
+{"timestamp": "2026-03-04T11:32:43.304582Z", "engagement_id": "eng_20260304_143238", "event": "RAG_INITIALIZED", "knowledge_chunks": 11}
+{"timestamp": "2026-03-04T11:32:43.342964Z", "engagement_id": "eng_20260304_143238", "event": "PHASE_TRANSITION", "from": "init", "to": "reconnaissance", "reason": "Starting reconnaissance"}
+{"timestamp": "2026-03-04T11:32:43.345488Z", "engagement_id": "eng_20260304_143238", "event": "SCOPE_CHECK", "url": "http://localhost:3000", "agent": "HTTPProber", "result": "ALLOWED"}
+{"timestamp": "2026-03-04T11:32:43.347528Z", "engagement_id": "eng_20260304_143238", "event": "RATE_LIMIT_ACQUIRE", "host": "localhost:3000", "url": "http://localhost:3000"}

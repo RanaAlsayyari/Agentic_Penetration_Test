@@ -1,0 +1,190 @@
+
+Running evaluation on: output/logs/audit_eng_20260304_183150.jsonl
+Report file: output/reports/report_eng_20260304_183150.md
+
+
+  AGENTIC PENETRATION TESTING SYSTEM - EVALUATION REPORT
+================================================================================
+  Engagement:  eng_20260304_183150
+  Timestamp:   2026-03-04T19:41:59.293645
+  Audit Log:   output/logs/audit_eng_20260304_18315================================================================================0.jsonl
+  Report:      output/reports/report_eng_20260304_183150.md
+================================================================================
+
+  LAYER 1: AGENT-LEVEL EVALUATION
+  ─────────────────────────────────
+  Passed: 20/36  |  Avg Score: 57.0%
+
+    [ReconAgent]
+      [PASS] recon_executed: 100%
+             Discovered 14 hosts
+      [FAIL] recon_endpoint_coverage: 47% (14endpoints)
+             Discovered 14 endpoints (target: >= 20)
+      [PASS] recon_spa_detection: 100%
+             SPA=True, framework=None
+      [FAIL] recon_tech_fingerprinting: 0% (0tech components)
+             Identified: none out of ['Angular', 'Node.js', 'Express', 'SQLite', 'JWT']
+      [FAIL] recon_known_endpoint_coverage: 7% (6.9%)
+             Found 4/58 known Juice Shop endpoints
+      [FAIL] recon_linkfinder_executed: 0% (0JS endpoints)
+             LINKFINDER_EXTRACTION not found
+      [PASS] recon_handoff_auth_paths: 100%
+             Auth-related paths (login/auth/signin) included in discovery
+
+    [AuthAgent]
+      [FAIL] auth_executed: 0%
+             No AUTH_ATTEMPT event
+      [FAIL] auth_correct_method: 0%
+             No auth attempt
+      [FAIL] auth_succeeded: 0%
+             No AUTH_SUCCESS event
+      [FAIL] auth_finding_emitted: 0%
+             No auth findings emitted
+      [PASS] auth_finding_severity_correct: 50%
+             Severity may not match
+      [FAIL] auth_handoff_to_scanner: 0%
+             Scanner did not receive auth context
+
+    [ScannerAgent]
+      [FAIL] scanner_auth_injected: 0%
+             No auth context for ZAP
+      [PASS] scanner_ajax_spider: 100% (0URLs)
+             AJAX Spider discovered 0 URLs
+      [FAIL] scanner_api_seeded: 0% (0endpoints)
+             Seeded 0 API endpoints
+      [FAIL] scanner_proxy_seeded: 0% (0requests)
+             Proxy-seeded 0 request/param combinations
+      [PASS] scanner_active_scan: 100% (155alerts)
+             Active scan found 155 alerts
+      [FAIL] scanner_high_alerts: 0% (0high alerts)
+             ZAP found 0 High/Critical alerts out of 298 total
+      [PASS] scanner_output_validity: 100%
+             298/298 findings have valid schema
+
+    [AnalyzerAgent]
+      [FAIL] analyzer_noise_filtered: 0% (0noise alerts)
+             NOISE_FILTERED event not found
+      [PASS] analyzer_fp_filtering: 100% (0false positives)
+             Rejected 0 false positives: []
+      [PASS] analyzer_true_positive_retention: 100% (100.0%)
+             Retained 0/0 ZAP High/Critical findings
+      [PASS] analyzer_output_produced: 100% (5findings)
+             Analyzer produced 5 confirmed findings
+      [PASS] analyzer_no_rate_errors: 100%
+             No rate limit errors
+
+    [ClassifierAgent]
+      [PASS] classifier_executed: 100%
+             Classified 5 findings
+      [PASS] classifier_owasp_accuracy: 100% (100.0%)
+             5/5 correct. UNVERIFIED:  -> ; UNVERIFIED:  -> ; UNVERIFIED:  -> ; UNVERIFIED:  -> ; UNVERIFIED:  -> 
+      [PASS] classifier_cwe_accuracy: 100% (100.0%)
+             5/5 CWE mappings validated
+      [FAIL] classifier_cvss_valid: 0%
+             0/0 CVSS vectors are valid CVSS:3.1 format
+      [FAIL] classifier_completeness: 50%
+             Some findings missing classification fields
+
+    [ReporterAgent]
+      [PASS] reporter_executed: 100%
+             Report at ./output/reports/report_eng_20260304_183150.md
+      [PASS] reporter_finding_completeness: 100%
+             5/5 findings in report. Missing: none
+      [PASS] reporter_required_sections: 100%
+             Sections: Executive Summary, Risk Summary, Detailed Findings, Methodology | Missing: none
+      [PASS] reporter_evidence_quality: 100% (100.0%)
+             10/10 findings have technical evidence
+      [PASS] reporter_remediation_specificity: 100%
+             Remediation references target-specific technologies
+      [PASS] reporter_report_length: 100% (1925words)
+             Report is 1925 words
+
+
+  LAYER 2: TOOL-LEVEL EVALUATION
+  ────────────────────────────────
+  Passed: 4/8  |  Avg Score: 40.0%
+
+    [ZAP]
+      [PASS] zap_live_high_alerts: 20% (1high alerts)
+             ZAP live: 1 High alerts, 1531 total
+      [PASS] zap_site_tree_coverage: 100% (289URLs)
+             ZAP site tree has 289 URLs
+      [FAIL] zap_utilization: 0% (0.0% of ceiling)
+             Agent got 0 High alerts vs estimated 8 manual ceiling (0%)
+
+    [HTTPProber]
+      [PASS] httpprober_success_rate: 100% (100.0%)
+             42/42 probes got responses
+      [PASS] httpprober_spa_accuracy: 100%
+             SPA detection: {'timestamp': '2026-03-04T15:31:56.624046Z', 'engagement_id': 'eng_20260304_183150', 'event': 'SPA_DETECTION', 'is_spa': True, 'framework': None, 'evidence': '3/3 random paths returned 
+      [FAIL] httpprober_linkfinder_yield: 0% (0endpoints)
+             LinkFinder extracted 0 endpoints from JS bundles
+
+    [AuthTool]
+      [FAIL] authtool_success_rate: 0% (0.0%)
+             0 successes, 0 failures out of 0 attempts
+      [FAIL] authtool_zap_auth_configured: 0%
+             ZAP auth configuration failed
+
+
+  LAYER 3: SYSTEM-LEVEL EVALUATION
+  ──────────────────────────────────
+  Passed: 16/18  |  Avg Score: 74.2%
+
+    [Pipeline]
+      [PASS] scoreboard_total_solves: 60% (6solves)
+             6/110 challenges solved
+      [PASS] scoreboard_difficulty_breakdown: 50%
+             By difficulty: 1-star: 2, 2-star: 4
+      [PASS] scoreboard_category_breadth: 100% (5categories)
+             Categories with solves: {'Miscellaneous', 'Broken Authentication', 'Broken Access Control', 'Injection', 'Security Misconfiguration'}
+      [PASS] scoreboard_login_admin: 100%
+             'Login Admin' (SQL Injection login bypass): SOLVED
+      [PASS] scoreboard_password_strength: 100%
+             'Password Strength' (Weak password discovery): SOLVED
+      [PASS] scoreboard_error_handling: 100%
+             'Error Handling' (Error disclosure): SOLVED
+      [FAIL] scoreboard_confidential_document: 0%
+             'Confidential Document' (Directory traversal): NOT SOLVED
+      [FAIL] scoreboard_admin_section: 0%
+             'Admin Section' (Access control bypass): NOT SOLVED
+      [PASS] scoreboard_score_board: 100%
+             'Score Board' (Information discovery): SOLVED
+      [PASS] precision: 100% (100.0%)
+             5 true positives out of 5 reported (noise in report: 0)
+      [PASS] recall: 5% (5.5%)
+             6/110 challenges solved
+      [PASS] exploit_depth_avg: 37% (1.1/3.0)
+             Average depth: 1.1/3.0 across 10 findings. Distribution: [1, 1, 1, 1, 1, 1, 1, 2, 1, 1]
+      [PASS] time_total_duration: 100% (9.9minutes)
+             Total pipeline time: 9.9 minutes (595s)
+      [PASS] time_phase_breakdown: 100%
+             Phase timing: reconnaissance: 24s; active_scanning: 466s; analysis: 15s; classification: 28s
+      [PASS] reliability_all_phases: 83%
+             Completed 5/6 phases: {'classification', 'active_scanning', 'reporting', 'reconnaissance', 'analysis'}
+      [PASS] reliability_no_scope_violations: 100%
+             No scope violations
+      [PASS] reliability_engagement_complete: 100%
+             Engagement completed successfully
+      [PASS] reliability_error_count: 100% (0errors)
+             0 error events in audit log
+
+================================================================================
+  COMPOSITE SCORE: 48.2%
+================================================================================
+  Breakdown:
+    precision             weight=0.30  score=1.00  weighted=0.300
+    tool_utilization      weight=0.25  score=0.00  weighted=0.000
+    exploit_depth         weight=0.20  score=0.37  weighted=0.073
+    recall                weight=0.15  score=0.05  weighted=0.008
+    reliability           weight=0.10  score=1.00  weighted=0.100
+
+  TOTAL TESTS: 40/62 passed
+  Agent Layer:  20/36 (57.0%)
+  Tool Layer:   4/8 (40.0%)
+  System Layer: 16/18 (74.2%)
+================================================================================
+
+  JSON results saved to: output/evaluation_eng_20260304_183150.json
+
+  Result: NEEDS IMPROVEMENT (composite < 50%)

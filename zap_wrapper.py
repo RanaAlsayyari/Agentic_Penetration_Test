@@ -28,6 +28,7 @@ import os
 from typing import Optional
 from datetime import datetime
 
+import httpx
 from zapv2 import ZAPv2
 
 from schemas import RawFinding, Host
@@ -176,11 +177,271 @@ class ZAPWrapper:
           we tell ZAP to use those cookies for all its requests.
           Now ZAP can reach /dashboard, /admin, /profile — pages
           that require login.
+
+        Uses ZAP's Replacer API to inject cookies into every outgoing request.
+        This is more reliable than the HTTP Sessions API for single-session testing.
         """
         for name, value in cookies.items():
-            # ZAP HTTP Sessions API
-            AuditLogger.log("ZAP_AUTH_COOKIE_SET", {"cookie_name": name})
+            try:
+                # Use ZAP Replacer to add cookie header to every request
+                self.zap.replacer.add_rule(
+                    description=f"Auth cookie: {name}",
+                    enabled="true",
+                    matchtype="REQ_HEADER",
+                    matchregex="false",
+                    matchstring="Cookie",
+                    replacement=f"{name}={value}",
+                    initiators=""
+                )
+                AuditLogger.log("ZAP_AUTH_COOKIE_SET", {
+                    "cookie_name": name,
+                    "method": "replacer_api",
+                    "status": "success"
+                })
+            except Exception as e:
+                # Fallback: try the script-based header injection
+                console.print(f"[yellow]  Warning: Replacer API failed for {name}, "
+                              f"trying header override: {e}[/yellow]")
+                try:
+                    self.zap.script.set_global_var(
+                        varkey=f"cookie_{name}", varvalue=f"{name}={value}"
+                    )
+                    AuditLogger.log("ZAP_AUTH_COOKIE_SET", {
+                        "cookie_name": name,
+                        "method": "global_var_fallback",
+                        "status": "success"
+                    })
+                except Exception as e2:
+                    AuditLogger.log("ZAP_AUTH_COOKIE_SET", {
+                        "cookie_name": name,
+                        "method": "failed",
+                        "error": str(e2)
+                    })
+                    console.print(f"[red]  Failed to set cookie {name}: {e2}[/red]")
+
         console.print("[cyan]🔐 ZAP authenticated with session cookies[/cyan]")
+
+    def set_authentication_header(self, header_name: str, header_value: str) -> None:
+        """
+        Pass an authentication header (e.g., Authorization: Bearer <JWT>) to ZAP.
+
+        WHY THIS IS NEEDED:
+          Juice Shop and modern SPAs use JWT tokens passed via Authorization header,
+          not cookies. Without this, ZAP scans the unauthenticated surface only.
+        """
+        try:
+            self.zap.replacer.add_rule(
+                description=f"Auth header: {header_name}",
+                enabled="true",
+                matchtype="REQ_HEADER",
+                matchregex="false",
+                matchstring=header_name,
+                replacement=header_value,
+                initiators=""
+            )
+            AuditLogger.log("ZAP_AUTH_HEADER_SET", {
+                "header": header_name,
+                "method": "replacer_api",
+                "status": "success"
+            })
+            console.print(f"[cyan]🔑 ZAP auth header set: {header_name}[/cyan]")
+        except Exception as e:
+            AuditLogger.log("ZAP_AUTH_HEADER_SET", {
+                "header": header_name,
+                "method": "failed",
+                "error": str(e)
+            })
+            console.print(f"[red]  Failed to set auth header {header_name}: {e}[/red]")
+
+    # ─── STEP 6: Proxy-driven seeding — populate ZAP site tree ─────────────
+
+    def proxy_seed(
+        self,
+        endpoints: list[str],
+        auth_headers: Optional[dict[str, str]] = None
+    ) -> int:
+        """
+        Send real HTTP requests through ZAP's proxy to populate its site tree
+        with request/response pairs that include parameters.
+
+        WHY THIS IS NEEDED:
+          ZAP's active scanner only tests parameters it has SEEN in its site tree.
+          Spiders (especially on SPAs) often fail to discover form fields and
+          API body parameters. By routing requests with typical parameters through
+          ZAP's proxy, we give the active scanner concrete input vectors to
+          inject payloads into.
+
+          Example: Without seeding, ZAP sees /rest/user/login but has no idea
+          it accepts {"email": "...", "password": "..."}. With seeding, the
+          active scanner will test both fields for SQL injection.
+        """
+        zap_proxy = (
+            f"http://{os.getenv('ZAP_HOST', 'localhost')}:"
+            f"{os.getenv('ZAP_PORT', '8080')}"
+        )
+
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        if auth_headers:
+            headers.update(auth_headers)
+
+        seeded = 0
+
+        try:
+            client = httpx.Client(
+                proxy=zap_proxy, headers=headers,
+                timeout=10, verify=False, follow_redirects=True
+            )
+        except TypeError:
+            # Older httpx versions use proxies dict
+            client = httpx.Client(
+                proxies={"http://": zap_proxy, "https://": zap_proxy},
+                headers=headers, timeout=10, verify=False, follow_redirects=True
+            )
+
+        console.print(f"[cyan]  Proxy-seeding {len(endpoints)} endpoints through ZAP...[/cyan]")
+
+        with client:
+            for url in endpoints:
+                if not self.gate.scope.is_allowed(url):
+                    continue
+
+                url_lower = url.rstrip("/").lower()
+
+                # Plain GET — seeds the URL itself in ZAP's site tree
+                try:
+                    client.get(url)
+                    seeded += 1
+                except Exception:
+                    pass
+
+                # Search endpoints: seed with query parameter
+                if any(kw in url_lower for kw in ["/search", "/find", "/query"]):
+                    try:
+                        client.get(url, params={"q": "test"})
+                        seeded += 1
+                    except Exception:
+                        pass
+
+                # Login/auth endpoints: POST with credential-shaped body
+                if any(kw in url_lower for kw in ["/login", "/signin", "/auth"]):
+                    try:
+                        client.post(
+                            url,
+                            json={"email": "test@test.com", "password": "test"}
+                        )
+                        seeded += 1
+                    except Exception:
+                        pass
+
+                # REST API endpoints: seed common CRUD parameters
+                if "/api/" in url_lower or "/rest/" in url_lower:
+                    try:
+                        client.get(url, params={"id": "1"})
+                        seeded += 1
+                    except Exception:
+                        pass
+                    try:
+                        client.post(
+                            url,
+                            json={"id": "1", "name": "test", "query": "test"}
+                        )
+                        seeded += 1
+                    except Exception:
+                        pass
+                    # Individual resource by ID
+                    try:
+                        client.get(url.rstrip("/") + "/1")
+                        seeded += 1
+                    except Exception:
+                        pass
+
+                # GraphQL: seed with a simple query
+                if "graphql" in url_lower:
+                    try:
+                        client.post(url, json={"query": "{__typename}"})
+                        seeded += 1
+                    except Exception:
+                        pass
+
+                time.sleep(0.1)  # Brief pause to avoid flooding
+
+        AuditLogger.log("PROXY_SEED_COMPLETE", {
+            "endpoints_processed": len(endpoints),
+            "requests_seeded": seeded
+        })
+
+        console.print(f"[green]  Seeded {seeded} request/param combinations[/green]")
+        return seeded
+
+    # ─── STEP 7: AJAX Spider — for SPAs ─────────────────────────────────────
+
+    def ajax_spider(self, target_url: str, max_duration_minutes: int = 5) -> list[str]:
+        """
+        AJAX Spider: renders JavaScript and discovers client-side routes.
+
+        WHY THIS IS ESSENTIAL FOR SPAs:
+          Standard ZAP spider follows <a href="..."> links in HTML.
+          SPAs like Angular/React/Vue don't have those — routes are in JavaScript.
+          The AJAX Spider launches a headless browser, executes JS, clicks elements,
+          and discovers the actual application pages.
+
+        Returns list of discovered in-scope URLs.
+        """
+        self.gate.check_and_acquire(target_url, agent_name="ZAPWrapper.ajax_spider")
+
+        console.print(f"[cyan]🕸️  ZAP AJAX Spider starting:[/cyan] {target_url}")
+        console.print(f"[cyan]   Max duration: {max_duration_minutes} minutes[/cyan]")
+        AuditLogger.log_tool_call("ZAPWrapper", "ajax_spider", target_url,
+                                   {"max_duration": max_duration_minutes}, "AJAX Spider started")
+
+        # Configure AJAX spider to use headless Chrome
+        try:
+            self.zap.ajaxSpider.set_option_browser_id("chrome-headless")
+        except Exception:
+            pass  # ZAP will use its default browser
+
+        try:
+            self.zap.ajaxSpider.set_option_max_duration(str(max_duration_minutes))
+        except Exception:
+            pass  # Some ZAP versions handle this differently
+
+        self.zap.ajaxSpider.scan(target_url, subtreeonly="true")
+
+        # Wait for completion
+        timeout = (max_duration_minutes + 1) * 60
+        start = time.time()
+        while self.zap.ajaxSpider.status == "running":
+            if time.time() - start > timeout:
+                console.print("\n  [AJAX Spider] Timeout reached — stopping...")
+                try:
+                    self.zap.ajaxSpider.stop()
+                except Exception:
+                    pass
+                break
+            num_results = self.zap.ajaxSpider.number_of_results
+            console.print(
+                f"  [AJAX Spider] Status: {self.zap.ajaxSpider.status}, "
+                f"Results: {num_results}",
+                end="\r"
+            )
+            time.sleep(5)
+
+        # Collect results
+        discovered_urls = []
+        try:
+            results = self.zap.ajaxSpider.full_results
+            if isinstance(results, dict):
+                for item in results.get("inScope", []):
+                    url = item.get("url", "")
+                    if url and self.gate.scope.is_allowed(url):
+                        discovered_urls.append(url)
+        except Exception as e:
+            console.print(f"[yellow]  Warning: Could not parse AJAX Spider results: {e}[/yellow]")
+
+        console.print(f"\n[green]✓ AJAX Spider found {len(discovered_urls)} in-scope URLs[/green]")
+        AuditLogger.log_tool_call("ZAPWrapper", "ajax_spider_complete", target_url,
+                                   {}, f"Discovered {len(discovered_urls)} URLs")
+        return discovered_urls
 
     # ─── Internal helpers ──────────────────────────────────────────────────────
 

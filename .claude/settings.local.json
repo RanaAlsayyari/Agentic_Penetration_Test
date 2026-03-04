@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m py_compile http_tools.py)",
+      "Bash(python -m py_compile zap_wrapper.py)",
+      "Bash(python -m py_compile safety_layer.py)",
+      "Bash(python -m py_compile rag_memory.py)",
+      "Bash(python -m py_compile agents.py)",
+      "Bash(\"/c/Program Files/Python311/python.exe\" -c \":*)"
+    ]
+  }
+}

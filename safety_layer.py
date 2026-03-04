@@ -186,6 +186,7 @@ class AuditLogger:
     _log_path: Optional[Path] = None
     _lock = threading.Lock()
     _engagement_id: str = "unset"
+    _write_failures: int = 0
 
     @classmethod
     def initialize(cls, engagement_id: str, log_dir: str = "./output/logs") -> None:
@@ -215,8 +216,16 @@ class AuditLogger:
             with cls._lock:
                 with open(cls._log_path, "a") as f:
                     f.write(json.dumps(entry) + "\n")
-        except Exception:
-            pass  # audit logging must never crash the agent
+        except Exception as e:
+            # Audit logging must never crash the agent, but we track failures
+            cls._write_failures += 1
+            if cls._write_failures == 1:
+                console.print(f"[bold yellow]⚠ Audit log write failed: {e}[/bold yellow]")
+            elif cls._write_failures % 50 == 0:
+                console.print(
+                    f"[bold yellow]⚠ Audit log: {cls._write_failures} "
+                    f"write failures so far[/bold yellow]"
+                )
 
     @classmethod
     def log_tool_call(
@@ -244,6 +253,11 @@ class AuditLogger:
             "url": url,
             "severity": severity
         })
+
+    @classmethod
+    def get_write_failures(cls) -> int:
+        """Return the number of failed audit log writes. Non-zero means the audit trail has gaps."""
+        return cls._write_failures
 
     @classmethod
     def log_phase_transition(cls, from_phase: str, to_phase: str, reason: str) -> None:
