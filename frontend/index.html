@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VOID — Agentic Penetration Testing</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Marked.js for markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <link rel="stylesheet" href="/static/index.css" />
+</head>
+<body>
+  <!-- ╔══════════════════════════════════════════════════════════════╗
+       ║  SCANLINE & NOISE OVERLAYS                                  ║
+       ╚══════════════════════════════════════════════════════════════╝ -->
+  <div class="crt-overlay" aria-hidden="true"></div>
+  <div class="noise-overlay" aria-hidden="true"></div>
+
+  <!-- ╔══════════════════════════════════════════════════════════════╗
+       ║  VIEW 1 — LANDING / CONFIGURATION                          ║
+       ╚══════════════════════════════════════════════════════════════╝ -->
+  <section id="view-landing" class="view active">
+    <div class="landing-container">
+      <!-- Logo / Title -->
+      <div class="logo-block">
+        <h1 class="logo-title">VOID</h1>
+        <p class="logo-subtitle">Agentic Penetration Testing System</p>
+        <div class="logo-line"></div>
+      </div>
+
+      <!-- Config Form -->
+      <form id="scan-form" autocomplete="off">
+        <!-- Target URL -->
+        <div class="field">
+          <label for="target-url">Target URL</label>
+          <input
+            id="target-url"
+            type="url"
+            placeholder="http://localhost:8888"
+            required
+            spellcheck="false"
+          />
+          <span class="field-hint">Must be a URL you are authorized to test</span>
+        </div>
+
+        <!-- Row: App Type + Mode -->
+        <div class="field-row">
+          <div class="field">
+            <label for="app-type">Application</label>
+            <select id="app-type">
+              <option value="dvwa">DVWA</option>
+              <option value="juiceshop">Juice Shop</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="scan-mode">Scan Mode</label>
+            <select id="scan-mode">
+              <option value="active">Active</option>
+              <option value="passive">Passive</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Advanced Config (collapsible) -->
+        <details class="advanced-panel">
+          <summary>Advanced Configuration</summary>
+          <div class="advanced-body">
+            <div class="field-row">
+              <div class="field">
+                <label for="adv-username">Username</label>
+                <input id="adv-username" type="text" placeholder="admin" spellcheck="false" />
+              </div>
+              <div class="field">
+                <label for="adv-password">Password</label>
+                <input id="adv-password" type="password" placeholder="password" />
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="adv-rate">Rate Limit (req/s)</label>
+                <input id="adv-rate" type="number" value="5" min="1" max="50" />
+              </div>
+              <div class="field checkbox-field">
+                <label>
+                  <input id="adv-noauth" type="checkbox" />
+                  <span>Skip authentication testing</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Authorization -->
+        <div class="field checkbox-field auth-check">
+          <label>
+            <input id="auth-confirm" type="checkbox" required />
+            <span>I confirm I am authorized to test this target.</span>
+          </label>
+        </div>
+
+        <!-- Launch Button -->
+        <button id="btn-start" type="submit" disabled>
+          <span class="btn-icon">&#9654;</span>
+          <span>INITIATE SCAN</span>
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ╔══════════════════════════════════════════════════════════════╗
+       ║  VIEW 2 — PIPELINE / LIVE EXECUTION                        ║
+       ╚══════════════════════════════════════════════════════════════╝ -->
+  <section id="view-pipeline" class="view">
+    <!-- Header Bar -->
+    <header class="pipeline-header">
+      <div class="header-left">
+        <span class="header-logo">VOID</span>
+        <span class="header-target" id="pipe-target"></span>
+      </div>
+      <div class="header-right">
+        <span class="header-mode" id="pipe-mode"></span>
+        <span class="header-timer" id="pipe-timer">00:00:00</span>
+      </div>
+    </header>
+
+    <div class="pipeline-body">
+      <!-- Sidebar — Agent List -->
+      <aside class="agent-sidebar">
+        <h2 class="sidebar-title">Agents</h2>
+        <ul class="agent-list" id="agent-list">
+          <li data-agent="recon" class="agent-item pending">
+            <span class="agent-status-icon"></span>
+            <div>
+              <span class="agent-name">Reconnaissance</span>
+              <span class="agent-desc">Host & technology discovery</span>
+            </div>
+          </li>
+          <li data-agent="auth" class="agent-item pending">
+            <span class="agent-status-icon"></span>
+            <div>
+              <span class="agent-name">Authentication</span>
+              <span class="agent-desc">Login & access control</span>
+            </div>
+          </li>
+          <li data-agent="scanner" class="agent-item pending">
+            <span class="agent-status-icon"></span>
+            <div>
+              <span class="agent-name">Mapping & Crawl</span>
+              <span class="agent-desc">ZAP spider & scan</span>
+            </div>
+          </li>
+          <li data-agent="analyzer" class="agent-item pending">
+            <span class="agent-status-icon"></span>
+            <div>
+              <span class="agent-name">Vulnerability Analysis</span>
+              <span class="agent-desc">RAG + LLM assessment</span>
+            </div>
+          </li>
+          <li data-agent="classifier" class="agent-item pending">
+            <span class="agent-status-icon"></span>
+            <div>
+              <span class="agent-name">Classification</span>
+              <span class="agent-desc">OWASP & CVSS mapping</span>
+            </div>
+          </li>
+          <li data-agent="reporter" class="agent-item pending">
+            <span class="agent-status-icon"></span>
+            <div>
+              <span class="agent-name">Reporting</span>
+              <span class="agent-desc">Final report generation</span>
+            </div>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Main Stage — Terminal Log -->
+      <main class="log-terminal" id="log-terminal">
+        <div class="terminal-toolbar">
+          <span class="terminal-dot red"></span>
+          <span class="terminal-dot yellow"></span>
+          <span class="terminal-dot green"></span>
+          <span class="terminal-title">live output</span>
+        </div>
+        <div class="terminal-body" id="terminal-body">
+          <p class="log-line dim">Waiting for scan to begin...</p>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- ╔══════════════════════════════════════════════════════════════╗
+       ║  VIEW 3 — REPORT                                           ║
+       ╚══════════════════════════════════════════════════════════════╝ -->
+  <section id="view-report" class="view">
+    <!-- Header Bar -->
+    <header class="report-header">
+      <div class="header-left">
+        <span class="header-logo">VOID</span>
+        <span class="header-badge">REPORT</span>
+      </div>
+      <div class="header-right">
+        <button id="btn-export-pdf" class="btn-secondary" title="Export to PDF">Export PDF</button>
+        <button id="btn-print" class="btn-secondary" title="Print Report">Print</button>
+        <button id="btn-new-scan" class="btn-primary">New Scan</button>
+      </div>
+    </header>
+
+    <div class="report-body">
+      <article id="report-content" class="report-rendered">
+        <p class="dim">Loading report...</p>
+      </article>
+    </div>
+  </section>
+
+  <script src="/static/index.js"></script>
+</body>
+</html>
