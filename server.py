@@ -23,7 +23,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ── App setup ────────────────────────────────────────────────────────────────
-app = FastAPI(title="VOID — Agentic Penetration Testing")
+app = FastAPI(title="PASS — Agentic Penetration Testing")
 
 # Use the same Python interpreter that is running this server
 PYTHON = sys.executable
@@ -98,7 +98,7 @@ async def _stream_process(cmd: list[str], ws: WebSocket):
     import threading
     import queue
 
-    await ws.send_text(json.dumps({"type": "log", "data": f"[VOID] Executing: {cmd[0]} {' '.join(cmd[1:])}"}))
+    await ws.send_text(json.dumps({"type": "log", "data": f"[PASS] Executing: {cmd[0]} {' '.join(cmd[1:])}"}))
 
     try:
         proc = subprocess.Popen(

@@ -196,7 +196,7 @@
 
     ws.onopen = () => {
       clearTerminal();
-      appendLog("[VOID] Connection established. Sending configuration...", "info");
+      appendLog("[PASS] Connection established. Sending configuration...", "info");
       ws.send(JSON.stringify(config));
     };
 
@@ -216,26 +216,26 @@
 
         case "status":
           if (msg.data === "scan_started") {
-            appendLog(`[VOID] Scan initiated — target: ${msg.config?.target}`, "success");
+            appendLog(`[PASS] Scan initiated — target: ${msg.config?.target}`, "success");
           } else if (msg.data === "scan_complete") {
             stopTimer();
             appendLog("", "dim");
-            appendLog("[VOID] ═══════════════════════════════════════", "success");
+            appendLog("[PASS] ═══════════════════════════════════════", "success");
 
             if (msg.returncode !== 0) {
-              appendLog(`[VOID] Scan exited with errors (code ${msg.returncode}). Check the logs above.`, "error");
+              appendLog(`[PASS] Scan exited with errors (code ${msg.returncode}). Check the logs above.`, "error");
             } else {
               completeAllAgents();
-              appendLog("[VOID] Engagement complete.", "success");
+              appendLog("[PASS] Engagement complete.", "success");
             }
 
             if (msg.report) {
               currentReportFile = msg.report;
-              appendLog(`[VOID] Report: ${msg.report}`, "success");
+              appendLog(`[PASS] Report: ${msg.report}`, "success");
               // Auto-transition to report view after a brief pause
               setTimeout(() => loadAndShowReport(msg.report), 1500);
             } else if (msg.returncode !== 0) {
-              appendLog("[VOID] No report generated — scan did not complete successfully.", "warn");
+              appendLog("[PASS] No report generated — scan did not complete successfully.", "warn");
             }
           }
           break;
@@ -253,7 +253,7 @@
     };
 
     ws.onclose = () => {
-      appendLog("[VOID] Connection closed.", "dim");
+      appendLog("[PASS] Connection closed.", "dim");
     };
   }
 
